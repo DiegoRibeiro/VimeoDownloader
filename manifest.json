@@ -1,0 +1,14 @@
+{
+    "name": "Private Vimeo Downloader",
+    "version": "1.0",
+    "description": "Plugin that allows download private video on vimeo",
+    "manifest_version": 2,
+    "background": {
+        "scripts": ["src/assets/js/background.js"],
+        "persistent": false
+    },
+    "permissions": ["activeTab", "declarativeContent", "storage"],
+    "page_action": {
+        "default_popup": "src/popup.html"
+    }
+}
