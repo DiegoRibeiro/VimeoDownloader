@@ -1,62 +1,101 @@
-console.log("popup");
-
 let idx, json, files, video, request;
-let video1080 = document.getElementById("video-1080");
+let wrapper = document.querySelector("#wrapper");
 
-console.log(video1080);
+function init() {
+	let ids = [];
+	let htmlBuilder = "";
 
-video1080.onclick = function() {
-    console.log("click!");
+	video = document.querySelector("#player");
+	
+	if(video != null) {
+		idx = video.contentWindow.document.scripts[3].innerText.indexOf("; if (!config");
+		json = video.contentWindow.document.scripts[3].innerText.substring(44, idx);
+		files = JSON.parse(json);
+		files = files.request.files.progressive;
 
-    chrome.tabs.query(
-        {
-            active: true, 
-            currentWindow: true
-        }, 
-        function(tabs) {
-            chrome.tabs.executeScript(
-                tabs[0].id, 
-                {
-                    code: `
-                        video = document.querySelector(".video");
-                        if(video == null) {
-                            alert("Go to a page that has a video");
-                        }
-                        else {
-                            idx = video.children[0].contentWindow.document.scripts[3].innerText.indexOf("; if (!config");
-                            json = document.querySelector(".video").children[0].contentWindow.document.scripts[3].innerText.substring(44, idx);
-                            files = JSON.parse(json);
-                            files = files.request.files.progressive;
-                            for(let val of files) {
-                                if(val.quality == "1080p") {
-                                    console.log(val);
-                                    var link = document.createElement('a');
-                                    link.href = val.url;
-                                    link.download = true;
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-                                    break;
-                                }
-                            }
-                        }
-                        
-                    `
-                }
-            );
-        }
-    );
+		for(let val of files) {
+			htmlBuilder += "<div><label for=\"video-"+val.quality+"\">"+val.quality+"</label><button id=\"video-"+val.quality+"\">download</button></div>";
+			ids.push(val.quality);
+		}
+	} else {
+		htmlBuilder += "<div>Nenhum video encontrado :(</div>";
+	}
+
+	return {
+		htmlBuilder: htmlBuilder,
+		ids: ids
+	};
 }
 
-/*request = new XMLHttpRequest();
-request.open('GET', val.url);
-request.onreadystatechange = function() {
-    if (request.readyState === 4) {
-        if (request.status === 200) {
-            alert(request.responseText);
-        } else {
-            alert('There was a problem with the request.');
-        }
-    }
+function download(quality) {
+	chrome.storage.local.get('quality', function(storage) {
+		chrome.storage.local.remove('quality'); // clean up
+
+		video = document.querySelector("#player");
+
+		if(video == null) {
+			alert("No video found on this page!");
+		} else {
+			idx = video.contentWindow.document.scripts[3].innerText.indexOf("; if (!config");
+			json = video.contentWindow.document.scripts[3].innerText.substring(44, idx);
+			files = JSON.parse(json);
+			files = files.request.files.progressive;
+			for(let val of files) {
+					if(val.quality == quality) {
+							console.log(val);
+							var link = document.createElement('a');
+							link.href = val.url;
+							link.download = true;
+							document.body.appendChild(link);
+							link.click();
+							document.body.removeChild(link);
+							break;
+					}
+			}
+		}
+	});
 }
-request.send();*/
+
+function addListener(id) {
+	let el = document.querySelector("#video-" + id);
+	el.onclick = function() {
+		chrome.tabs.query(
+			{
+					active: true, 
+					currentWindow: true
+			}, 
+			function(tabs) {
+				chrome.scripting.executeScript(
+					{
+						target: {tabId: tabs[0].id},
+						function: download,
+						args: [id]
+					}
+				);
+			}
+		)
+	};
+}
+
+// INIT: mount all download buttons
+chrome.tabs.query(
+	{
+			active: true, 
+			currentWindow: true
+	}, 
+	function(tabs) {
+		chrome.scripting.executeScript(
+			{
+				target: {tabId: tabs[0].id},
+				function: init
+			},
+			(injectionResults) => {
+				wrapper.innerHTML += injectionResults[0].result.htmlBuilder;
+				for(let val of injectionResults[0].result.ids) {
+					addListener(val);
+				}
+			}
+		);
+	}
+);
+
