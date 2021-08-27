@@ -4,6 +4,8 @@
 # HOW TO INSTALL
 chrome://extensions/
 
+activate developer mode and import the extension
+
 For this extension to work you need to open chrome with this aditional parameter (tested on v92)
 --disable-web-security
 
@@ -14,6 +16,7 @@ make sure to close all chromes process
 
 # docs 
 https://developer.chrome.com/docs/extensions/reference/scripting/
+
 For execute content script inside a page add the following permissions:
 - activeTab
 - scripting
@@ -21,7 +24,8 @@ For execute content script inside a page add the following permissions:
 every time you open your extension the js of the popup will execute
 
 # Testing cors:
-```function alertContents() {
+```
+function alertContents() {
 	if (httpRequest.readyState === XMLHttpRequest.DONE) {
 		if (httpRequest.status === 200) {
 			alert(httpRequest.responseText);
