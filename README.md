@@ -4,15 +4,17 @@
 # HOW TO INSTALL
 chrome://extensions/
 
-activate developer mode and import the extension
+Activate developer mode and import the extension
 
-For this extension to work you need to open chrome with this aditional parameter (tested on v92)
+For this extension to work you need to open chrome some aditional parameters (tested on v92):
 --disable-web-security
+--disable-site-isolation-trials
+--user-data-dir=
 
-create a new short and add this param
+Create a new shortcut with this params
 "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --disable-web-security --disable-site-isolation-trials --user-data-dir=C:\Users\YourUser\Desktop\data
 
-make sure to close all chromes process
+Make sure to close all chromes process
 
 # docs 
 https://developer.chrome.com/docs/extensions/reference/scripting/
@@ -21,7 +23,7 @@ For execute content script inside a page add the following permissions:
 - activeTab
 - scripting
 
-every time you open your extension the js of the popup will execute
+Every time you open your extension the js of the popup will be executed.
 
 # Testing cors:
 ```
